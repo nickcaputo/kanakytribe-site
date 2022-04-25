@@ -1,0 +1,1262 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <title>KanakyTribe | Mint</title>
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script src='https://cdn.jsdelivr.net/npm/bignumber.js@9.0.2/bignumber.min.js'></script>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="asset/css/bootstrap.min.css">
+    <link rel="stylesheet" href="asset/css/slick-theme.min.css">
+    <link rel="stylesheet" href="asset/fontawesome-free-6.0.0-web/css/all.min.css">
+    <link rel="stylesheet" href="asset/css/styles.css">
+</head>
+
+<body>
+
+    <section class="bg-green py-5">
+        <div class="container">
+            <div class="row align-items-center justify-content-center">
+                <div class="col-12 text-center mb-2">
+                    <a href="https://discord.gg/Kw47x8T8JE" target="__blank" class="btn font-PeaceSans bg-black text-white py-2 px-3">DISCORD</a> 
+                    <br />
+                    <br />
+                    <br />
+                    <h1 class="text-white text-center cursor-pointer font-PeaceSans"> Kanaky Tribe </h1>
+                </div>
+                <div class="col-12 col-sm-8 col-lg-4 mt-4">
+                    <div class="carousel-slider">
+                        <img src="asset/images/gold.png" class="img-fluid slider-img" alt="">
+                        <img src="asset/images/green.png" class="img-fluid slider-img" alt="">
+                        <img src="asset/images/robot.png" class="img-fluid slider-img" alt="">
+                        <img src="asset/images/trippy.png" class="img-fluid slider-img" alt="">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row align-items-center justify-content-center">
+                <div>
+                    <input type="number" 
+                        id="mint-count" 
+                        min="1" 
+                        max="10"
+                        class="button bg-mint font-PeaceSans" />
+                    
+                    <button type="button" id="mint" class="button bg-mint font-PeaceSans">MINT</button> 
+                </div>
+                
+            </div>
+
+            <br/>
+
+            <script type="text/javascript">
+                var account = null;
+                var contract = null;
+                const ABI = [{
+                                "inputs": [
+                                    {
+                                        "internalType": "bytes32",
+                                        "name": "merkleRoot_",
+                                        "type": "bytes32"
+                                    },
+                                    {
+                                        "internalType": "address[]",
+                                        "name": "shareholders_",
+                                        "type": "address[]"
+                                    },
+                                    {
+                                        "internalType": "uint256[]",
+                                        "name": "shares_",
+                                        "type": "uint256[]"
+                                    }
+                                ],
+                                "stateMutability": "nonpayable",
+                                "type": "constructor"
+                            },
+                            {
+                                "anonymous": false,
+                                "inputs": [
+                                    {
+                                        "indexed": true,
+                                        "internalType": "address",
+                                        "name": "owner",
+                                        "type": "address"
+                                    },
+                                    {
+                                        "indexed": true,
+                                        "internalType": "address",
+                                        "name": "approved",
+                                        "type": "address"
+                                    },
+                                    {
+                                        "indexed": true,
+                                        "internalType": "uint256",
+                                        "name": "tokenId",
+                                        "type": "uint256"
+                                    }
+                                ],
+                                "name": "Approval",
+                                "type": "event"
+                            },
+                            {
+                                "anonymous": false,
+                                "inputs": [
+                                    {
+                                        "indexed": true,
+                                        "internalType": "address",
+                                        "name": "owner",
+                                        "type": "address"
+                                    },
+                                    {
+                                        "indexed": true,
+                                        "internalType": "address",
+                                        "name": "operator",
+                                        "type": "address"
+                                    },
+                                    {
+                                        "indexed": false,
+                                        "internalType": "bool",
+                                        "name": "approved",
+                                        "type": "bool"
+                                    }
+                                ],
+                                "name": "ApprovalForAll",
+                                "type": "event"
+                            },
+                            {
+                                "anonymous": false,
+                                "inputs": [
+                                    {
+                                        "indexed": false,
+                                        "internalType": "address",
+                                        "name": "account",
+                                        "type": "address"
+                                    },
+                                    {
+                                        "indexed": false,
+                                        "internalType": "uint256",
+                                        "name": "id",
+                                        "type": "uint256"
+                                    },
+                                    {
+                                        "indexed": false,
+                                        "internalType": "uint256",
+                                        "name": "amount",
+                                        "type": "uint256"
+                                    }
+                                ],
+                                "name": "ClaimRewards",
+                                "type": "event"
+                            },
+                            {
+                                "anonymous": false,
+                                "inputs": [
+                                    {
+                                        "indexed": true,
+                                        "internalType": "contract IERC20",
+                                        "name": "token",
+                                        "type": "address"
+                                    },
+                                    {
+                                        "indexed": false,
+                                        "internalType": "address",
+                                        "name": "to",
+                                        "type": "address"
+                                    },
+                                    {
+                                        "indexed": false,
+                                        "internalType": "uint256",
+                                        "name": "amount",
+                                        "type": "uint256"
+                                    }
+                                ],
+                                "name": "ERC20PaymentReleased",
+                                "type": "event"
+                            },
+                            {
+                                "anonymous": false,
+                                "inputs": [
+                                    {
+                                        "indexed": false,
+                                        "internalType": "address",
+                                        "name": "account",
+                                        "type": "address"
+                                    },
+                                    {
+                                        "indexed": false,
+                                        "internalType": "uint256",
+                                        "name": "amount",
+                                        "type": "uint256"
+                                    }
+                                ],
+                                "name": "MintPrivate",
+                                "type": "event"
+                            },
+                            {
+                                "anonymous": false,
+                                "inputs": [
+                                    {
+                                        "indexed": false,
+                                        "internalType": "address",
+                                        "name": "account",
+                                        "type": "address"
+                                    },
+                                    {
+                                        "indexed": false,
+                                        "internalType": "uint256",
+                                        "name": "amount",
+                                        "type": "uint256"
+                                    }
+                                ],
+                                "name": "MintPublic",
+                                "type": "event"
+                            },
+                            {
+                                "anonymous": false,
+                                "inputs": [
+                                    {
+                                        "indexed": false,
+                                        "internalType": "uint256",
+                                        "name": "amount",
+                                        "type": "uint256"
+                                    }
+                                ],
+                                "name": "MintReserve",
+                                "type": "event"
+                            },
+                            {
+                                "anonymous": false,
+                                "inputs": [
+                                    {
+                                        "indexed": true,
+                                        "internalType": "address",
+                                        "name": "previousOwner",
+                                        "type": "address"
+                                    },
+                                    {
+                                        "indexed": true,
+                                        "internalType": "address",
+                                        "name": "newOwner",
+                                        "type": "address"
+                                    }
+                                ],
+                                "name": "OwnershipTransferred",
+                                "type": "event"
+                            },
+                            {
+                                "anonymous": false,
+                                "inputs": [
+                                    {
+                                        "indexed": false,
+                                        "internalType": "address",
+                                        "name": "account",
+                                        "type": "address"
+                                    },
+                                    {
+                                        "indexed": false,
+                                        "internalType": "uint256",
+                                        "name": "shares",
+                                        "type": "uint256"
+                                    }
+                                ],
+                                "name": "PayeeAdded",
+                                "type": "event"
+                            },
+                            {
+                                "anonymous": false,
+                                "inputs": [
+                                    {
+                                        "indexed": false,
+                                        "internalType": "address",
+                                        "name": "from",
+                                        "type": "address"
+                                    },
+                                    {
+                                        "indexed": false,
+                                        "internalType": "uint256",
+                                        "name": "amount",
+                                        "type": "uint256"
+                                    }
+                                ],
+                                "name": "PaymentReceived",
+                                "type": "event"
+                            },
+                            {
+                                "anonymous": false,
+                                "inputs": [
+                                    {
+                                        "indexed": false,
+                                        "internalType": "address",
+                                        "name": "to",
+                                        "type": "address"
+                                    },
+                                    {
+                                        "indexed": false,
+                                        "internalType": "uint256",
+                                        "name": "amount",
+                                        "type": "uint256"
+                                    }
+                                ],
+                                "name": "PaymentReleased",
+                                "type": "event"
+                            },
+                            {
+                                "anonymous": false,
+                                "inputs": [
+                                    {
+                                        "indexed": false,
+                                        "internalType": "address",
+                                        "name": "to",
+                                        "type": "address"
+                                    },
+                                    {
+                                        "indexed": false,
+                                        "internalType": "uint256",
+                                        "name": "amount",
+                                        "type": "uint256"
+                                    }
+                                ],
+                                "name": "SweepToken",
+                                "type": "event"
+                            },
+                            {
+                                "anonymous": false,
+                                "inputs": [
+                                    {
+                                        "indexed": true,
+                                        "internalType": "address",
+                                        "name": "from",
+                                        "type": "address"
+                                    },
+                                    {
+                                        "indexed": true,
+                                        "internalType": "address",
+                                        "name": "to",
+                                        "type": "address"
+                                    },
+                                    {
+                                        "indexed": true,
+                                        "internalType": "uint256",
+                                        "name": "tokenId",
+                                        "type": "uint256"
+                                    }
+                                ],
+                                "name": "Transfer",
+                                "type": "event"
+                            },
+                            {
+                                "inputs": [
+                                    {
+                                        "internalType": "address",
+                                        "name": "to",
+                                        "type": "address"
+                                    },
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "tokenId",
+                                        "type": "uint256"
+                                    }
+                                ],
+                                "name": "approve",
+                                "outputs": [],
+                                "stateMutability": "nonpayable",
+                                "type": "function"
+                            },
+                            {
+                                "inputs": [
+                                    {
+                                        "internalType": "address",
+                                        "name": "owner",
+                                        "type": "address"
+                                    }
+                                ],
+                                "name": "balanceOf",
+                                "outputs": [
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "",
+                                        "type": "uint256"
+                                    }
+                                ],
+                                "stateMutability": "view",
+                                "type": "function"
+                            },
+                            {
+                                "inputs": [
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "id",
+                                        "type": "uint256"
+                                    }
+                                ],
+                                "name": "claimRewards",
+                                "outputs": [],
+                                "stateMutability": "nonpayable",
+                                "type": "function"
+                            },
+                            {
+                                "inputs": [
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "tokenId",
+                                        "type": "uint256"
+                                    }
+                                ],
+                                "name": "getApproved",
+                                "outputs": [
+                                    {
+                                        "internalType": "address",
+                                        "name": "",
+                                        "type": "address"
+                                    }
+                                ],
+                                "stateMutability": "view",
+                                "type": "function"
+                            },
+                            {
+                                "inputs": [
+                                    {
+                                        "internalType": "address",
+                                        "name": "owner",
+                                        "type": "address"
+                                    },
+                                    {
+                                        "internalType": "address",
+                                        "name": "operator",
+                                        "type": "address"
+                                    }
+                                ],
+                                "name": "isApprovedForAll",
+                                "outputs": [
+                                    {
+                                        "internalType": "bool",
+                                        "name": "",
+                                        "type": "bool"
+                                    }
+                                ],
+                                "stateMutability": "view",
+                                "type": "function"
+                            },
+                            {
+                                "inputs": [],
+                                "name": "merkleRoot",
+                                "outputs": [
+                                    {
+                                        "internalType": "bytes32",
+                                        "name": "",
+                                        "type": "bytes32"
+                                    }
+                                ],
+                                "stateMutability": "view",
+                                "type": "function"
+                            },
+                            {
+                                "inputs": [
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "amount",
+                                        "type": "uint256"
+                                    },
+                                    {
+                                        "internalType": "bytes32[]",
+                                        "name": "merkleProof",
+                                        "type": "bytes32[]"
+                                    },
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "index",
+                                        "type": "uint256"
+                                    }
+                                ],
+                                "name": "mintPrivate",
+                                "outputs": [],
+                                "stateMutability": "payable",
+                                "type": "function"
+                            },
+                            {
+                                "inputs": [
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "amount",
+                                        "type": "uint256"
+                                    }
+                                ],
+                                "name": "mintPublic",
+                                "outputs": [],
+                                "stateMutability": "payable",
+                                "type": "function"
+                            },
+                            {
+                                "inputs": [
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "amount",
+                                        "type": "uint256"
+                                    }
+                                ],
+                                "name": "mintReserve",
+                                "outputs": [],
+                                "stateMutability": "nonpayable",
+                                "type": "function"
+                            },
+                            {
+                                "inputs": [],
+                                "name": "name",
+                                "outputs": [
+                                    {
+                                        "internalType": "string",
+                                        "name": "",
+                                        "type": "string"
+                                    }
+                                ],
+                                "stateMutability": "view",
+                                "type": "function"
+                            },
+                            {
+                                "inputs": [],
+                                "name": "owner",
+                                "outputs": [
+                                    {
+                                        "internalType": "address",
+                                        "name": "",
+                                        "type": "address"
+                                    }
+                                ],
+                                "stateMutability": "view",
+                                "type": "function"
+                            },
+                            {
+                                "inputs": [
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "tokenId",
+                                        "type": "uint256"
+                                    }
+                                ],
+                                "name": "ownerOf",
+                                "outputs": [
+                                    {
+                                        "internalType": "address",
+                                        "name": "",
+                                        "type": "address"
+                                    }
+                                ],
+                                "stateMutability": "view",
+                                "type": "function"
+                            },
+                            {
+                                "inputs": [
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "index",
+                                        "type": "uint256"
+                                    }
+                                ],
+                                "name": "payee",
+                                "outputs": [
+                                    {
+                                        "internalType": "address",
+                                        "name": "",
+                                        "type": "address"
+                                    }
+                                ],
+                                "stateMutability": "view",
+                                "type": "function"
+                            },
+                            {
+                                "inputs": [
+                                    {
+                                        "internalType": "address payable",
+                                        "name": "account",
+                                        "type": "address"
+                                    }
+                                ],
+                                "name": "release",
+                                "outputs": [],
+                                "stateMutability": "nonpayable",
+                                "type": "function"
+                            },
+                            {
+                                "inputs": [
+                                    {
+                                        "internalType": "contract IERC20",
+                                        "name": "token",
+                                        "type": "address"
+                                    },
+                                    {
+                                        "internalType": "address",
+                                        "name": "account",
+                                        "type": "address"
+                                    }
+                                ],
+                                "name": "release",
+                                "outputs": [],
+                                "stateMutability": "nonpayable",
+                                "type": "function"
+                            },
+                            {
+                                "inputs": [
+                                    {
+                                        "internalType": "contract IERC20",
+                                        "name": "token",
+                                        "type": "address"
+                                    },
+                                    {
+                                        "internalType": "address",
+                                        "name": "account",
+                                        "type": "address"
+                                    }
+                                ],
+                                "name": "released",
+                                "outputs": [
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "",
+                                        "type": "uint256"
+                                    }
+                                ],
+                                "stateMutability": "view",
+                                "type": "function"
+                            },
+                            {
+                                "inputs": [
+                                    {
+                                        "internalType": "address",
+                                        "name": "account",
+                                        "type": "address"
+                                    }
+                                ],
+                                "name": "released",
+                                "outputs": [
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "",
+                                        "type": "uint256"
+                                    }
+                                ],
+                                "stateMutability": "view",
+                                "type": "function"
+                            },
+                            {
+                                "inputs": [],
+                                "name": "renounceOwnership",
+                                "outputs": [],
+                                "stateMutability": "nonpayable",
+                                "type": "function"
+                            },
+                            {
+                                "inputs": [],
+                                "name": "reserve",
+                                "outputs": [
+                                    {
+                                        "internalType": "address",
+                                        "name": "",
+                                        "type": "address"
+                                    }
+                                ],
+                                "stateMutability": "view",
+                                "type": "function"
+                            },
+                            {
+                                "inputs": [
+                                    {
+                                        "internalType": "address",
+                                        "name": "from",
+                                        "type": "address"
+                                    },
+                                    {
+                                        "internalType": "address",
+                                        "name": "to",
+                                        "type": "address"
+                                    },
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "tokenId",
+                                        "type": "uint256"
+                                    }
+                                ],
+                                "name": "safeTransferFrom",
+                                "outputs": [],
+                                "stateMutability": "nonpayable",
+                                "type": "function"
+                            },
+                            {
+                                "inputs": [
+                                    {
+                                        "internalType": "address",
+                                        "name": "from",
+                                        "type": "address"
+                                    },
+                                    {
+                                        "internalType": "address",
+                                        "name": "to",
+                                        "type": "address"
+                                    },
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "tokenId",
+                                        "type": "uint256"
+                                    },
+                                    {
+                                        "internalType": "bytes",
+                                        "name": "_data",
+                                        "type": "bytes"
+                                    }
+                                ],
+                                "name": "safeTransferFrom",
+                                "outputs": [],
+                                "stateMutability": "nonpayable",
+                                "type": "function"
+                            },
+                            {
+                                "inputs": [
+                                    {
+                                        "internalType": "address",
+                                        "name": "operator",
+                                        "type": "address"
+                                    },
+                                    {
+                                        "internalType": "bool",
+                                        "name": "approved",
+                                        "type": "bool"
+                                    }
+                                ],
+                                "name": "setApprovalForAll",
+                                "outputs": [],
+                                "stateMutability": "nonpayable",
+                                "type": "function"
+                            },
+                            {
+                                "inputs": [
+                                    {
+                                        "internalType": "address",
+                                        "name": "_token",
+                                        "type": "address"
+                                    }
+                                ],
+                                "name": "setToken",
+                                "outputs": [],
+                                "stateMutability": "nonpayable",
+                                "type": "function"
+                            },
+                            {
+                                "inputs": [
+                                    {
+                                        "internalType": "string",
+                                        "name": "uri",
+                                        "type": "string"
+                                    }
+                                ],
+                                "name": "setURI",
+                                "outputs": [],
+                                "stateMutability": "nonpayable",
+                                "type": "function"
+                            },
+                            {
+                                "inputs": [
+                                    {
+                                        "internalType": "address",
+                                        "name": "account",
+                                        "type": "address"
+                                    }
+                                ],
+                                "name": "shares",
+                                "outputs": [
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "",
+                                        "type": "uint256"
+                                    }
+                                ],
+                                "stateMutability": "view",
+                                "type": "function"
+                            },
+                            {
+                                "inputs": [],
+                                "name": "supplyLive",
+                                "outputs": [
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "",
+                                        "type": "uint256"
+                                    }
+                                ],
+                                "stateMutability": "view",
+                                "type": "function"
+                            },
+                            {
+                                "inputs": [],
+                                "name": "supplyLiveMax",
+                                "outputs": [
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "",
+                                        "type": "uint256"
+                                    }
+                                ],
+                                "stateMutability": "view",
+                                "type": "function"
+                            },
+                            {
+                                "inputs": [],
+                                "name": "supplyReserveMax",
+                                "outputs": [
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "",
+                                        "type": "uint256"
+                                    }
+                                ],
+                                "stateMutability": "view",
+                                "type": "function"
+                            },
+                            {
+                                "inputs": [],
+                                "name": "supplyReserveMinted",
+                                "outputs": [
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "",
+                                        "type": "uint256"
+                                    }
+                                ],
+                                "stateMutability": "view",
+                                "type": "function"
+                            },
+                            {
+                                "inputs": [
+                                    {
+                                        "internalType": "bytes4",
+                                        "name": "interfaceId",
+                                        "type": "bytes4"
+                                    }
+                                ],
+                                "name": "supportsInterface",
+                                "outputs": [
+                                    {
+                                        "internalType": "bool",
+                                        "name": "",
+                                        "type": "bool"
+                                    }
+                                ],
+                                "stateMutability": "view",
+                                "type": "function"
+                            },
+                            {
+                                "inputs": [
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "amount",
+                                        "type": "uint256"
+                                    },
+                                    {
+                                        "internalType": "address",
+                                        "name": "to",
+                                        "type": "address"
+                                    },
+                                    {
+                                        "internalType": "bool",
+                                        "name": "max",
+                                        "type": "bool"
+                                    }
+                                ],
+                                "name": "sweepToken",
+                                "outputs": [],
+                                "stateMutability": "nonpayable",
+                                "type": "function"
+                            },
+                            {
+                                "inputs": [],
+                                "name": "symbol",
+                                "outputs": [
+                                    {
+                                        "internalType": "string",
+                                        "name": "",
+                                        "type": "string"
+                                    }
+                                ],
+                                "stateMutability": "view",
+                                "type": "function"
+                            },
+                            {
+                                "inputs": [
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "tokenId",
+                                        "type": "uint256"
+                                    }
+                                ],
+                                "name": "tokenURI",
+                                "outputs": [
+                                    {
+                                        "internalType": "string",
+                                        "name": "",
+                                        "type": "string"
+                                    }
+                                ],
+                                "stateMutability": "view",
+                                "type": "function"
+                            },
+                            {
+                                "inputs": [
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "id",
+                                        "type": "uint256"
+                                    }
+                                ],
+                                "name": "tokensClaimable",
+                                "outputs": [
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "earned",
+                                        "type": "uint256"
+                                    }
+                                ],
+                                "stateMutability": "view",
+                                "type": "function"
+                            },
+                            {
+                                "inputs": [
+                                    {
+                                        "internalType": "contract IERC20",
+                                        "name": "token",
+                                        "type": "address"
+                                    }
+                                ],
+                                "name": "totalReleased",
+                                "outputs": [
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "",
+                                        "type": "uint256"
+                                    }
+                                ],
+                                "stateMutability": "view",
+                                "type": "function"
+                            },
+                            {
+                                "inputs": [],
+                                "name": "totalReleased",
+                                "outputs": [
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "",
+                                        "type": "uint256"
+                                    }
+                                ],
+                                "stateMutability": "view",
+                                "type": "function"
+                            },
+                            {
+                                "inputs": [],
+                                "name": "totalShares",
+                                "outputs": [
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "",
+                                        "type": "uint256"
+                                    }
+                                ],
+                                "stateMutability": "view",
+                                "type": "function"
+                            },
+                            {
+                                "inputs": [
+                                    {
+                                        "internalType": "address",
+                                        "name": "from",
+                                        "type": "address"
+                                    },
+                                    {
+                                        "internalType": "address",
+                                        "name": "to",
+                                        "type": "address"
+                                    },
+                                    {
+                                        "internalType": "uint256",
+                                        "name": "tokenId",
+                                        "type": "uint256"
+                                    }
+                                ],
+                                "name": "transferFrom",
+                                "outputs": [],
+                                "stateMutability": "nonpayable",
+                                "type": "function"
+                            },
+                            {
+                                "inputs": [
+                                    {
+                                        "internalType": "address",
+                                        "name": "newOwner",
+                                        "type": "address"
+                                    }
+                                ],
+                                "name": "transferOwnership",
+                                "outputs": [],
+                                "stateMutability": "nonpayable",
+                                "type": "function"
+                            },
+                            {
+                                "stateMutability": "payable",
+                                "type": "receive"
+                            }
+                        ];
+                const ADDRESS = "0xd9D1adefe862A7065845cd769a74A9F5B9288dbE";
+                (async () => {
+                    if (typeof window.ethereum !== undefined) {
+                        await window.ethereum.request({ method: "eth_requestAccounts" });
+                        window.web3 = new Web3(window.ethereum);
+
+                        var accounts = await web3.eth.getAccounts();
+                        account = accounts[0];
+                    
+                        contract = new web3.eth.Contract(ABI, ADDRESS);
+
+                        document.getElementById('mint').onclick = () => {
+                            var maticPublicPrice = new BigNumber(150000000000000000000);
+                            var amountToMint = document.getElementById('mint-count').value;
+                            // console.log(maticPublicPrice);
+                            // console.log(amountToMint);
+                            // console.log(maticPublicPrice * amountToMint);
+                            // console.log((maticPublicPrice * amountToMint).toString());
+                            contract.methods.mintPublic(account).send( {from: account, value: (maticPublicPrice.times(amountToMint)) });
+                        }
+                    }
+                })();
+
+                const deploy = async(abi, bytecode) => {
+                    var deployingContract = new web3.eth.Contract(abi).deploy({
+                        data: bytecode,
+                        arguments: []
+                    });
+                    var estimatedGas = await deployingContract.estimateGas();
+
+                    var deployedContract = await deployingContract.send({
+                        from: account,
+                        gas: estimatedGas
+                    })
+
+                    // console.log("Address of Contract - " + deployedContract.options.ADDRESS);
+
+                    return deployedContract.options.ADDRESS;
+                }
+
+            </script>
+
+            <div class="row mt-5">
+                <div class="col-12">
+                    <h1 class="text-light-mint text-center cursor-pointer font-PeaceSans"> FAQ </h1>
+                    <div id="accordion" class="mt-3">
+                        <div class="border-top-mint"></div>
+                        <div class="card border-0 bg-transparent rounded-0">
+                            <div class="card-header rounded-0" id="headingOne">
+                                <h5 class="mb-0 d-flex justify-content-between align-items-center">
+                                    <button class="btn btn-link text-white font-weight-bold text-left arrow-down-btn pl-0" data-toggle="collapse" data-target="#collapseOne"
+                                        aria-expanded="true" aria-controls="collapseOne">
+                                        1. WHAT IS Kanaky Tribe?
+                                    </button>
+                                    <i class="fa-solid fa-chevron-down arrow-down text-white"></i>
+                                </h5>
+                            </div>
+
+                            <div id="collapseOne" class="collapse show" aria-labelledby="headingOne"
+                                data-parent="#accordion">
+                                <div class="card-body text-white">
+                                    <p>Kanaky Tribe is a community driven project focused on cleaning up the earth and
+                                        reducing
+                                        poverty through irl events and charity. All money raised from royalties will go
+                                        towards
+                                        planting trees and giving meals to people in need of our help, and supplying
+                                        them with
+                                        basic
+                                        supplies (e.g blankets, clothes). We have decided on a decreased price of 100
+                                        MATIC for
+                                        WL,
+                                        150 MATIC For Public Sale. This will give you a cool profile pic and to be a
+                                        part of
+                                        world
+                                        change </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="border-top-mint"></div>
+                        <div class="card border-0 bg-transparent rounded-0">
+                            <div class="card-header rounded-0" id="headingOne">
+                                <h5 class="mb-0 d-flex justify-content-between align-items-center">
+                                    <button class="btn btn-link text-white font-weight-bold text-left arrow-down-btn pl-0" data-toggle="collapse" data-target="#collapseTwo"
+                                        aria-expanded="false" aria-controls="collapseOne">
+                                        2. The launch date will be 25/04/2022 for WL, and 26/4/22 for public sale
+                                    </button>
+                                    <i class="fa-solid fa-chevron-down arrow-down text-white"></i>
+                                </h5>
+                            </div>
+
+                            <div id="collapseTwo" class="collapse" aria-labelledby="headingOne"
+                                data-parent="#accordion">
+                                <div class="card-body text-white">
+                                    <p> </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="border-top-mint"></div>
+                        <div class="card border-0 bg-transparent rounded-0">
+                            <div class="card-header rounded-0" id="headingOne">
+                                <h5 class="mb-0 d-flex justify-content-between align-items-center">
+                                    <button class="btn btn-link text-white font-weight-bold text-left arrow-down-btn pl-0" data-toggle="collapse" data-target="#collapseThree"
+                                        aria-expanded="false" aria-controls="collapseOne">
+                                        3. HOW CAN I MINT?
+                                    </button>
+                                    <i class="fa-solid fa-chevron-down arrow-down text-white"></i>
+                                </h5>
+                            </div>
+
+                            <div id="collapseThree" class="collapse" aria-labelledby="headingOne"
+                                data-parent="#accordion">
+                                <div class="card-body text-white">
+                                    <p>Check 🆘・how-to-mint section in our Discord</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="border-top-mint"></div>
+                        <div class="card border-0 bg-transparent rounded-0">
+                            <div class="card-header rounded-0" id="headingOne">
+                                <h5 class="mb-0 d-flex justify-content-between align-items-center">
+                                    <button class="btn btn-link text-white font-weight-bold text-left arrow-down-btn pl-0" data-toggle="collapse" data-target="#collapseFour"
+                                        aria-expanded="false" aria-controls="collapseOne">
+                                        4. WHAT WILL BE THE PRICE?
+                                    </button>
+                                    <i class="fa-solid fa-chevron-down arrow-down text-white"></i>
+                                </h5>
+                            </div>
+
+                            <div id="collapseFour" class="collapse" aria-labelledby="headingOne"
+                                data-parent="#accordion">
+                                <div class="card-body text-white">
+                                    <p>Whitelist 100 MATIC + gas fees,
+
+                                    <p> Public Sale Price: 150 MATIC + gas fees </p>
+
+                                    <p> As for gas we will make it as low as possible with our unique smart contract.
+                                        (Gas
+                                        refers to
+                                        the fee, or pricing value, required to successfully conduct a transaction or
+                                        execute a
+                                        contract on the Ethereum blockchain.) </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="border-top-mint"></div>
+                        <div class="card border-0 bg-transparent rounded-0">
+                            <div class="card-header rounded-0" id="headingOne">
+                                <h5 class="mb-0 d-flex justify-content-between align-items-center">
+                                    <button class="btn btn-link text-white font-weight-bold text-left arrow-down-btn pl-0" data-toggle="collapse" data-target="#collapseFive"
+                                        aria-expanded="false" aria-controls="collapseOne">
+                                        5. HOW DO I GET ON THE WHITELIST?
+                                    </button>
+                                    <i class="fa-solid fa-chevron-down arrow-down text-white"></i>
+                                </h5>
+                            </div>
+
+                            <div id="collapseFive" class="collapse" aria-labelledby="headingOne"
+                                data-parent="#accordion">
+                                <div class="card-body text-white">
+                                    <p> To claim a whitelist spot you have to help us build the strongest community. We
+                                        will
+                                        reward
+                                        our loyal Discord members who engage the most with the other community members
+                                        and
+                                        supports
+                                        their fellow Kanaky Tribe with answering questions. </p>
+
+                                    <p> Our Whitelist will be entered into exclusive giveaways and early leaks before
+                                        the rest
+                                        of
+                                        the tribe, as well as cheaper gas fees. For first 100 whitelist spots LVL 6 + 6
+                                        invites
+                                        will
+                                        secure you a whitelist spot when done. </p>
+
+                                    <p> We will also be hosting giveways on our giveaway channel through game
+                                        tournaments and
+                                        trivia. </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="border-top-mint"></div>
+                        <div class="card border-0 bg-transparent rounded-0">
+                            <div class="card-header rounded-0" id="headingOne">
+                                <h5 class="mb-0 d-flex justify-content-between align-items-center">
+                                    <button class="btn btn-link text-white font-weight-bold text-left arrow-down-btn pl-0" data-toggle="collapse" data-target="#collapseSix"
+                                        aria-expanded="false" aria-controls="collapseOne">
+                                        6. ROADMAP
+                                    </button>
+                                    <i class="fa-solid fa-chevron-down arrow-down text-white"></i>
+                                </h5>
+                            </div>
+
+                            <div id="collapseSix" class="collapse" aria-labelledby="headingOne"
+                                data-parent="#accordion">
+                                <div class="card-body text-white">
+                                    <p>The roadmap can be viewed via our website or 🛣・roadmap in discord. We designed
+                                        our
+                                        roadmap
+                                        in a manner where it's constantly evolving. We do not want to promise strict
+                                        deadlines
+                                        to
+                                        the community, so that we don't have to rush our work. Our ultimate goal is to
+                                        create
+                                        value
+                                        for the Kanaky tribe community and this means announcing pieces of our hidden
+                                        roadmap
+                                        when
+                                        you least expect it. </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="border-top-mint"></div>
+                        <div class="card border-0 bg-transparent rounded-0">
+                            <div class="card-header rounded-0" id="headingOne">
+                                <h5 class="mb-0 d-flex justify-content-between align-items-center">
+                                    <button class="btn btn-link text-white font-weight-bold text-left arrow-down-btn pl-0" data-toggle="collapse" data-target="#collapseSeven"
+                                        aria-expanded="false" aria-controls="collapseOne">
+                                        7. Rules & Tips
+                                    </button>
+                                    <i class="fa-solid fa-chevron-down arrow-down text-white"></i>
+                                </h5>
+                            </div>
+
+                            <div id="collapseSeven" class="collapse" aria-labelledby="headingOne"
+                                data-parent="#accordion">
+                                <div class="card-body text-white">
+                                    <p> Respect Discord Terms Of Use (TOS) - No racism, hate speech or harassment - No
+                                        disrespectful
+                                        behavior - No NSFW content - No spamming - Do not respond to dms. - Staff and
+                                        Founders
+                                        will
+                                        NOT DM YOU. - Watch out for scam COLLAB LANDS. - We will never ask for seed
+                                        phrase
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="border-top-mint"></div>
+                    </div>
+                </div>
+            </div>
+    </section>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="asset/js/jquery.min.js"></script>
+    <script src="asset/js/popper.min.js"></script>
+    <script src="asset/js/bootstrap.min.js"></script>
+    <script src="asset/js/slick.min.js"></script>
+    <script src="asset/js/custom.js"></script>
+</body>
+
+</html>

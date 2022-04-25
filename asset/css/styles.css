@@ -1,0 +1,125 @@
+@font-face {
+    font-family: 'PeaceSans';
+    src: url('../fonts/PeaceSans/PeaceSans.eot');
+    src: url('../fonts/PeaceSans/PeaceSans.eot') format('embedded-opentype'),
+        url('../fonts/PeaceSans/PeaceSans.woff2') format('woff2'),
+        url('../fonts/PeaceSans/PeaceSans.woff') format('woff'),
+        url('../fonts/PeaceSans/PeaceSans.ttf') format('truetype'),
+        url('../fonts/PeaceSans/PeaceSans.svg#PeaceSans') format('svg');
+}
+
+.font-PeaceSans {
+    font-family: 'PeaceSans';
+}
+
+.bg-green {
+    background-color: #05403b;
+}
+
+.text-light-mint {
+    color: #82a09d
+}
+
+.bg-light-mint {
+    background-color: #82a09d
+}
+
+
+.bg-mint {
+    background-color: #6ef7b8 !important;
+}
+
+.bg-black{
+    background-color: #000;
+}
+
+.border-mint {
+    border: 1px solid #6ef7b8;
+}
+
+.border-top-mint {
+    border-top: 1px solid #6ef7b8 !important;
+}
+
+.button {
+    border: none;
+    border-radius: 5%;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    display: inline-block;
+    font-size: 24px;
+    margin: 4px 2px;
+    cursor: pointer;
+  }
+
+.cursor-pointer{
+    cursor: pointer;
+}
+
+.arrow-down-btn[aria-expanded="true"] + .arrow-down {
+	transform: rotate(180deg);
+}
+
+.mintcrementer {
+    font-size: 30px !important;
+    height: 56px !important;
+    width: 60px !important;
+    border-radius: 0 !important;
+}
+
+.slider-img {
+    border-radius: 7px;
+}
+
+.carousel-arrow-right {
+    position: absolute;
+    bottom: 6px;
+    right: 40px;
+    cursor: pointer;
+}
+
+.carousel-arrow-left {
+    position: absolute;
+    bottom: 6px;
+    left: 40px;
+    cursor: pointer;
+}
+
+.carousel-arrow-left:hover,
+.carousel-arrow-right:hover {
+    background-color: #086e7d;
+    border-radius: 100%;
+    color: white;
+}
+
+.carousel-slider .slick-slide {
+    margin: 0px 10px;
+}
+
+.carousel-slider .slick-dots {
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+    padding: 1rem 0;
+    list-style-type: none;
+}
+
+.carousel-slider .slick-dots li {
+    margin: 0 0.25rem;
+}
+
+.carousel-slider .slick-dots button {
+    display: block;
+    width: 10px;
+    height: 10px;
+    padding: 0;
+    border: none;
+    border-radius: 100%;
+    background-color: #82a09d;
+    text-indent: -9999px;
+}
+
+.carousel-slider .slick-dots li.slick-active button {
+    background-color: white;
+}
